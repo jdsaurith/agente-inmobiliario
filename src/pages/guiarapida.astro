@@ -1,0 +1,36 @@
+---
+import PageLayout from "@/layouts/Base.astro";
+
+const meta = {
+	description: "Funciona como un agente inmobiliario, publicando propiedades en múltiples portales.",
+	title: "Guía Rápida",
+};
+---
+
+<PageLayout meta={meta}>
+
+<section>
+    <h1 class="title mb-6 text-accent-two">
+        Guía Rápida 
+    </h1>
+    <p class="mb-4 text-lg font-medium">
+        Funciona como un agente inmobiliario, publicando propiedades en múltiples portales. 
+        <br />
+        <strong>Agente Inmobiliario</strong> te permite cargar imágenes y detalles de tus propiedades una sola vez y publicarlas en múltiples portales al instante.
+        Ahorrá tiempo y centralizá tu gestión. ¡Empezá ahora!
+    </p>
+    <div class="flex flex-col md:flex-row justify-center mt-4 gap-4">
+        <a href="/about/" class="relative flex items-center justify-center h-8 px-4 rounded-lg shadow-lg hover:brightness-110 transition-all bg-gradient-to-r from-accent-one to-accent-two">
+            <span class="text-bgColor font-semibold">
+                Registrate gratis
+            </span>
+        </a>
+
+        <a href="/notes/wake-up/" class="relative flex items-center justify-center h-8 px-4 rounded-lg shadow-lg bg-special-lighter hover:brightness-110 hover:bg-special-lightest">
+            <span class="bg-clip-text text-transparent font-semibold bg-gradient-to-r from-accent-one to-accent-two">
+                Iniciar sesión
+            </span>
+        </a>
+</section>
+
+</PageLayout>

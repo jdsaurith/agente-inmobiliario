@@ -1,6 +1,6 @@
 ---
 import { type CollectionEntry, render } from "astro:content";
-import TOC from "@/components/blog/TOC.astro";
+// import TOC from "@/components/blog/TOC.astro";
 import BaseLayout from "./Base.astro";
 import SeriesPanel from "@/components/SeriesPanel.astro";
 import { Icon } from "astro-icon/components";
@@ -76,7 +76,7 @@ const { headings } = await render(series);
 					id="toc-panel" 
 					class="sticky md:top-20 z-10 hidden md:w-[16rem] md:min-w-[16rem] rounded-lg md:block"
 				>
-					<TOC headings={headings} />
+					{/* <TOC headings={headings} /> */}
 				</aside>
 			)
 		}

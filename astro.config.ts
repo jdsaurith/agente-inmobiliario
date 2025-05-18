@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import react from "@astrojs/react";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 import tailwind from "@astrojs/tailwind";
@@ -26,10 +27,11 @@ import {
 // https://astro.build/config
 export default defineConfig({
   image: {
-    domains: ["webmention.io"],
+    // domains: ["webmention.io"],
   },
   integrations: [
     icon(),
+    react(),
     tailwind({
       applyBaseStyles: false,
       nesting: true,
@@ -115,7 +117,7 @@ export default defineConfig({
   // https://docs.astro.build/en/guides/prefetch/
   prefetch: true,
   // ! Please remember to replace the following site property with your own domain
-  site: "http://astrocitrus.artemkutsan.pp.ua/",
+  site: "https://www.uparsoft.net/",
   vite: {
     build: {
       sourcemap: true, // Source maps generation

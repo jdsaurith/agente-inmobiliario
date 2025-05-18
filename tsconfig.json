@@ -1,6 +1,8 @@
 {
   "extends": "astro/tsconfigs/strictest",
   "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "strictNullChecks": true,
@@ -10,25 +12,11 @@
     "noImplicitAny": true,
     "noImplicitThis": true,
     "baseUrl": ".",
-    "lib": [
-      "es2022",
-      "dom",
-      "dom.iterable"
-    ],
+    "lib": ["es2022", "dom", "dom.iterable"],
     "paths": {
-      "@/*": [
-        "src/*"
-      ]
-    },
+      "@/*": ["src/*"]
+    }
   },
-  "include": [
-    ".astro/types.d.ts",
-    "**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "**/node_modules/*",
-    ".vscode",
-    "dist"
-  ]
+  "include": [".astro/types.d.ts", "**/*"],
+  "exclude": ["node_modules", "**/node_modules/*", ".vscode", "dist"]
 }
