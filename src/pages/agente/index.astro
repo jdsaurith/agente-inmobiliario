@@ -1,0 +1,28 @@
+---
+
+import Agent from '@/components/agente/FormAgente';
+import PreciosLayout from '@/layouts/PreciosLayout.astro';
+
+const meta = {
+	description: "Ingresa a tu cuenta de Agente Inmobiliario y publica tus propiedades en múltiples portales al instante.",
+	title: "Agente Inmobiliario",
+};
+
+---
+
+
+<PreciosLayout meta={meta}>
+    <!-- Hero section -->
+    <!-- Background blur -->
+    <div class="absolute top-0 left-1/2 md:top-[-15%] -ml-[50vw] min-h-screen w-screen pointer-events-none blur-3xl opacity-50 overflow-x-hidden">
+        <div class="absolute top-[10%] right-[-40%] w-[65%] h-full bg-gradient-to-b from-purple-300 via-blue-300 to-transparent rounded-full opacity-30 dark:opacity-10"></div>
+        <div class="absolute top-[10%] left-[-40%] w-[65%] h-full bg-gradient-to-b from-blue-300 via-pink-300 to-transparent rounded-full opacity-30 dark:opacity-10"></div>
+        <div class="absolute top-[-20%] left-[-50%] w-[85%] h-full bg   -gradient-to-b from-indigo-300 via-orange-300 to-transparent rounded-full opacity-60 dark:opacity-10"></div>
+        <div class="absolute top-[-20%] right-[-50%] w-[85%] h-full bg-gradient-to-b from-orange-300 via-indigo-300 to-transparent rounded-full opacity-60 dark:opacity-10"></div>  
+    </div>
+    <section>
+        <Agent />
+    </section>
+        
+    
+</PreciosLayout>
