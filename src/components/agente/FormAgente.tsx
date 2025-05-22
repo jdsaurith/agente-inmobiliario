@@ -1,10 +1,54 @@
-// import { PhotoIcon, UserCircleIcon } from '@heroicons/react/24/solid'
+import { useState } from "react";
+import type { ChangeEvent } from "react";
 import { MdOutlineAddPhotoAlternate } from "react-icons/md";
-import { FaRegCircleUser } from "react-icons/fa6";
-// import { ChevronDownIcon } from '@heroicons/react/16/solid'
-import { IoChevronDownOutline } from "react-icons/io5";
+import { MdClose } from "react-icons/md";
+
+interface UploadedFile extends File {
+  // Extiende File para mantener compatibilidad
+}
 
 export default function Agent() {
+  const [mainImage, setMainImage] = useState<File | null>(null);
+  const [mainImagePreview, setMainImagePreview] = useState<string | null>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+
+  const handleMainImageChange = (
+    event: ChangeEvent<HTMLInputElement>
+  ): void => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setMainImage(file);
+      const reader = new FileReader();
+      reader.onload = (e: ProgressEvent<FileReader>): void => {
+        if (e.target?.result && typeof e.target.result === "string") {
+          setMainImagePreview(e.target.result);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleMultipleFilesChange = (
+    event: ChangeEvent<HTMLInputElement>
+  ): void => {
+    const files = event.target.files;
+    if (files) {
+      const filesArray = Array.from(files) as UploadedFile[];
+      setUploadedFiles((prevFiles) => [...prevFiles, ...filesArray]);
+    }
+  };
+
+  const removeFile = (indexToRemove: number): void => {
+    setUploadedFiles((prevFiles) =>
+      prevFiles.filter((_, index) => index !== indexToRemove)
+    );
+  };
+
+  const removeMainImage = (): void => {
+    setMainImage(null);
+    setMainImagePreview(null);
+  };
+
   return (
     <form>
       <div className="space-y-12 mt-10">
@@ -853,34 +897,77 @@ export default function Agent() {
 
           {/* Imagenes */}
           <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+            {/* Imagen Principal */}
             <div className="col-span-full">
               <label
-                htmlFor="photo"
+                htmlFor="main-image"
                 className="block text-sm/6 font-medium text-gray-900 dark:text-white"
               >
-                Photo
+                Imagen Principal
               </label>
-              <div className="mt-2 flex items-center gap-x-3">
-                <FaRegCircleUser
-                  aria-hidden="true"
-                  className="size-12 text-gray-300"
-                />
-                <button
-                  type="button"
-                  className="rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50"
-                >
-                  Change
-                </button>
-              </div>
+
+              {mainImagePreview ? (
+                <div className="mt-2 relative inline-block">
+                  <img
+                    src={mainImagePreview}
+                    alt="Imagen principal"
+                    className="w-64 h-48 object-cover rounded-lg border border-gray-300 dark:border-gray-600"
+                  />
+                  <button
+                    onClick={removeMainImage}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
+                  >
+                    <MdClose className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 flex items-center mt-4"
+                  >
+                    <span className="mr-2">🤖</span>
+                    Generar
+                  </button>
+                </div>
+              ) : (
+                <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 dark:border-white px-6 py-10">
+                  <div className="text-center">
+                    <MdOutlineAddPhotoAlternate
+                      aria-hidden="true"
+                      className="mx-auto size-12 text-gray-300"
+                    />
+                    <div className="mt-4 flex text-sm/6 text-gray-600 dark:text-white">
+                      <label
+                        htmlFor="main-image"
+                        className="relative cursor-pointer px-2 rounded-md bg-white dark:bg-gray-800 font-semibold text-indigo-600 focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 focus-within:outline-hidden hover:text-indigo-500"
+                      >
+                        <span>Subir Imagen</span>
+                        <input
+                          id="main-image"
+                          name="main-image"
+                          type="file"
+                          accept="image/*"
+                          onChange={handleMainImageChange}
+                          className="sr-only"
+                        />
+                      </label>
+                      <p className="pl-1">or drag and drop</p>
+                    </div>
+                    <p className="text-xs/5 text-gray-600 dark:text-white">
+                      PNG, JPG, up to 10MB
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
 
+            {/* Upload Multiple Files */}
             <div className="col-span-full">
               <label
-                htmlFor="cover-photo"
+                htmlFor="multiple-files"
                 className="block text-sm/6 font-medium text-gray-900 dark:text-white"
               >
-                Cover photo
+                Upload a File
               </label>
+
               <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 dark:border-white px-6 py-10">
                 <div className="text-center">
                   <MdOutlineAddPhotoAlternate
@@ -889,35 +976,65 @@ export default function Agent() {
                   />
                   <div className="mt-4 flex text-sm/6 text-gray-600 dark:text-white">
                     <label
-                      htmlFor="file-upload"
-                      className="relative cursor-pointer px-2 rounded-md bg-white font-semibold text-indigo-600 focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 focus-within:outline-hidden hover:text-indigo-500"
+                      htmlFor="multiple-files"
+                      className="relative cursor-pointer px-2 rounded-md bg-white dark:bg-gray-800 font-semibold text-indigo-600 focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 focus-within:outline-hidden hover:text-indigo-500"
                     >
-                      <span>Upload a file</span>
+                      <span>Upload files</span>
                       <input
-                        id="file-upload"
-                        name="file-upload"
+                        id="multiple-files"
+                        name="multiple-files"
                         type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={handleMultipleFilesChange}
                         className="sr-only"
                       />
                     </label>
                     <p className="pl-1">or drag and drop</p>
                   </div>
                   <p className="text-xs/5 text-gray-600 dark:text-white">
-                    PNG, JPG, GIF up to 10MB
+                    PNG, JPG, GIF up to 10MB (multiple files allowed)
                   </p>
                 </div>
               </div>
+
+              {/* Lista de archivos subidos */}
+              {uploadedFiles.length > 0 && (
+                <div className="mt-4">
+                  <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                    Archivos seleccionados ({uploadedFiles.length}):
+                  </h4>
+                  <div className="space-y-2">
+                    {uploadedFiles.map((file, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between bg-gray-50 dark:bg-gray-800 px-3 py-2 rounded-md"
+                      >
+                        <span className="text-sm text-gray-700 dark:text-gray-300 truncate">
+                          {file.name}
+                        </span>
+                        <button
+                          onClick={() => removeFile(index)}
+                          className="ml-2 text-red-500 hover:text-red-700 focus:outline-none"
+                        >
+                          <MdClose className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Estado */}
-          <div className="">
+          <div className="mt-10">
             <fieldset>
               <legend className="text-sm/6 font-semibold text-gray-900 dark:text-white">
                 Estado
               </legend>
 
-              <div className="flex flex-col md:flex-row mt-10 gap-x-6 gap-y-8">
+              <div className="flex flex-col md:flex-row mt-4 gap-x-6 gap-y-8">
                 <div className="flex items-center gap-x-3">
                   <input
                     defaultChecked

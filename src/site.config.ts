@@ -34,7 +34,7 @@ export const menuLinks: { path: string; title: string }[] = [
     title: "Guía Rápida",
   },
   {
-    path: "/notes/",
-    title: "Notes",
+    path: "/agente/",
+    title: "Agente",
   },
 ];
