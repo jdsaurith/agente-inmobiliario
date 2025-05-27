@@ -48,9 +48,91 @@ export default function Agent() {
     }
   };
 
+  // Función para manejar el envío del formulario
   const onSubmit = (data: any) => {
-    console.log("data:", data);
-    console.log("data.multipleFiles:", data.multipleFiles);
+    console.log("Datos del formulario:", data);
+    const formData = new FormData();
+
+    for (const key in data) {
+      if (data.hasOwnProperty(key)) {
+        const value = data[key];
+
+        if (
+          value instanceof FileList ||
+          (Array.isArray(value) && value.every((item) => item instanceof File))
+        ) {
+          const filesToProcess = Array.from(value);
+
+          if (filesToProcess.length === 0 && key === "multipleFiles") {
+            continue;
+          }
+
+          for (let i = 0; i < filesToProcess.length; i++) {
+            const file = filesToProcess[i];
+            if (
+              file &&
+              file instanceof File &&
+              typeof file.name === "string" &&
+              typeof file.size === "number"
+            ) {
+              const fileName = file.name || `untitled_from_${key}_${i}`;
+              formData.append(key, file, fileName);
+            }
+          }
+        } else if (value instanceof File) {
+          const fileName = value.name || `untitled_from_${key}`;
+          formData.append(key, value, fileName);
+        } else if (typeof value === "object" && value !== null) {
+          try {
+            formData.append(key, JSON.stringify(value));
+          } catch (e) {
+            console.error(
+              `Error al convertir el objeto para la clave '${key}' a JSON: `,
+              e
+            );
+          }
+        } else {
+          if (value !== undefined && value !== null) {
+            formData.append(key, String(value));
+          }
+        }
+      }
+    }
+
+    fetch("http://localhost:5678/webhook-test/nueva-propiedad", {
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => {
+        console.log("Respuesta HTTP Status:", response.status);
+        console.log(
+          "Respuesta HTTP Content-Type:",
+          response.headers.get("Content-Type")
+        );
+        return response.text();
+      })
+      .then((text) => {
+        console.log("Respuesta cruda (texto) desde n8n:", text);
+        try {
+          const result = JSON.parse(text);
+          console.log(
+            "Respuesta del webhook (interpretada como JSON):",
+            result
+          );
+        } catch (e) {
+          console.error(
+            "Error al interpretar la respuesta de n8n como JSON:",
+            e
+          );
+          console.log("La respuesta no era JSON. Texto recibido:", text);
+        }
+      })
+      .catch((error) => {
+        console.error(
+          "Error en la solicitud fetch (ej. problema de red, CORS si aplica, etc.):",
+          error
+        );
+      });
   };
 
   return (

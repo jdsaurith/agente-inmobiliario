@@ -1,7 +1,5 @@
-import React, { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
 
 type DescripcionSectionProps = {
   generateContentWithAI: (
@@ -15,20 +13,27 @@ export function DescripcionSection({
   generateContentWithAI,
   loadingAI,
 }: DescripcionSectionProps) {
-  const [description, setDescription] = useState("");
+  // 1. Obtén los métodos de react-hook-form
+  const {
+    register,
+    setValue,
+    watch, // Para obtener el valor actual para el prompt de IA
+    formState: { errors },
+  } = useFormContext();
 
-  // Validación personalizada para evitar código malicioso básico
+  // El nombre del campo para react-hook-form
+  const fieldName = "descripcion"; // Asegúrate que este sea el nombre que esperas en tu formulario
+
+  // Observa el valor actual del campo de descripción para usarlo en el prompt de la IA
+  const currentDescription = watch(fieldName, ""); // El segundo argumento es el valor por defecto
+
+  // 2. Validación personalizada (ya la tienes, la integraremos en register)
   const noCodigoMalicioso = (value: string) => {
     const regex = /<\/?[\w\s="/.':;#-\/\?]+>/gi;
     return !regex.test(value) || "No se permiten etiquetas HTML";
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const val = e.target.value;
-    if (noCodigoMalicioso(val) === true) {
-      setDescription(val);
-    }
-  };
+  // La función handleChange local ya no es necesaria, register se encarga.
 
   return (
     <>
@@ -38,19 +43,42 @@ export function DescripcionSection({
       <div className="mt-4">
         <textarea
           rows={4}
-          value={description}
-          onChange={handleChange}
-          className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 dark:text-white dark:bg-gray-800 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+          // 3. Registra el textarea con react-hook-form
+          {...register(fieldName, {
+            validate: {
+              noCodigoMalicioso: noCodigoMalicioso,
+            },
+            // Puedes añadir más validaciones aquí si es necesario
+            required: "La descripción es obligatoria",
+          })}
+          className={`block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 dark:text-white dark:bg-gray-800 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${
+            errors[fieldName] ? "ring-red-500" : "" // Estilo opcional para errores
+          }`}
           placeholder="Ingrese la descripción"
+          // El valor es manejado por react-hook-form, no necesitas value ni onChange aquí directamente
         />
+        {/* 4. Muestra los errores de validación */}
+        {errors[fieldName] && (
+          <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+            {errors[fieldName]?.message as string}
+          </p>
+        )}
       </div>
       <div className="mt-3 flex justify-end">
         <Button
           type="button"
           onClick={() =>
             generateContentWithAI(
-              `Genera una descripción para la propiedad, partiendo de la descripción: ${description}`,
-              setDescription
+              `Genera una descripción para la propiedad, partiendo de la descripción: ${
+                currentDescription || "" // Usa el valor observado
+              }`,
+              (newText: string) => {
+                // 5. Actualiza el valor del campo usando setValue y valida
+                setValue(fieldName, newText, {
+                  shouldValidate: true, // Para que se ejecute la validación noCodigoMalicioso
+                  shouldDirty: true, // Para marcar el campo como modificado
+                });
+              }
             )
           }
           disabled={loadingAI}

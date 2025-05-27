@@ -10,7 +10,7 @@ const ImagenesSection = () => {
 
   const mainImage = watch("mainImage");
   const multipleFiles = watch("multipleFiles");
-  console.log("multipleFiles", multipleFiles);
+  // console.log("multipleFiles", multipleFiles);
 
   const [mainImagePreview, setMainImagePreview] = useState<string | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);

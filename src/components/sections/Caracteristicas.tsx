@@ -20,6 +20,7 @@ const Caracteristicas: React.FC = () => {
       label: "Área Total (m²)",
       placeholder: "Área Total (m²)",
     },
+    { name: "antiguedad", label: "Antiguedad", placeholder: "Antiguedad" },
   ];
 
   const esNumeroPositivo = (value: string) =>
