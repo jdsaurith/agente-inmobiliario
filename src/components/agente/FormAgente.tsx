@@ -12,6 +12,7 @@ import Caracteristicas from "../sections/Caracteristicas";
 import Comodidades from "../sections/Comodidades";
 import ImagenesSection from "../sections/ImagenesSection";
 import { Estado } from "../sections/EstadoSection";
+import PortalesSection from "../sections/PortalesSection";
 
 export default function Agent() {
   const methods = useForm();
@@ -184,6 +185,8 @@ export default function Agent() {
 
             {/* Estado */}
             <Estado />
+            {/* Portales Seleccionados */}
+            <PortalesSection />
           </div>
         </div>
 

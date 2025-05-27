@@ -50,16 +50,17 @@ export default function UrlSection({ onGenerateUrl }: Props) {
           })}
           placeholder="Ej: departamento-palermo-2dorm"
         />
-        {errors.urlUnica && (
-          <p className="text-red-500 text-sm mt-1">
-            {errors.urlUnica.message as string}
-          </p>
-        )}
+
         <Button type="button" onClick={handleGenerate}>
           <span className="mr-1">🤖</span>
           Generar
         </Button>
       </div>
+      {errors.urlUnica && (
+        <p className="text-red-500 text-sm mt-1">
+          {errors.urlUnica.message as string}
+        </p>
+      )}
     </div>
   );
 }

@@ -6,36 +6,66 @@ import { MdClose, MdOutlineAddPhotoAlternate } from "react-icons/md";
 interface UploadedFile extends File {}
 
 const ImagenesSection = () => {
-  const { register, setValue, watch } = useFormContext();
+  const {
+    register,
+    setValue,
+    watch,
+    formState: { errors },
+    trigger, // Import trigger to manually trigger validation if needed
+  } = useFormContext();
 
   const mainImage = watch("mainImage");
-  const multipleFiles = watch("multipleFiles");
+  const multipleFilesValue = watch("multipleFiles");
   // console.log("multipleFiles", multipleFiles);
 
   const [mainImagePreview, setMainImagePreview] = useState<string | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
 
+  // Register multipleFiles with validation rules
   useEffect(() => {
-    register("multipleFiles"); // se asegura que el campo esté registrado
-  }, [register]);
+    register("multipleFiles", {
+      validate: (value: UploadedFile[] | undefined) =>
+        (value && value.length > 1) ||
+        "Debes subir al menos dos imágenes adicionales.",
+    });
+    // Initialize with current uploadedFiles if they exist from a previous state or defaultValues
+    if (
+      multipleFilesValue &&
+      multipleFilesValue.length > 0 &&
+      uploadedFiles.length === 0
+    ) {
+      setUploadedFiles(multipleFilesValue);
+    }
+  }, [register, multipleFilesValue]); // Add multipleFilesValue to dependencies
 
+  // Effect for main image preview
   useEffect(() => {
-    if (mainImage && mainImage[0]) {
+    if (mainImage && mainImage.length > 0 && mainImage[0]) {
+      const file = mainImage[0];
       const reader = new FileReader();
       reader.onload = (e) => {
         if (e.target?.result && typeof e.target.result === "string") {
           setMainImagePreview(e.target.result);
         }
       };
-      reader.readAsDataURL(mainImage[0]);
+      reader.readAsDataURL(file);
     } else {
       setMainImagePreview(null);
     }
   }, [mainImage]);
 
+  // Effect to synchronize local `uploadedFiles` state with RHF's `multipleFiles` field
+  // This is mainly for initialization or if RHF state changes externally.
+  // Direct updates to RHF are done in handlers.
   useEffect(() => {
-    setValue("multipleFiles", uploadedFiles);
-  }, [uploadedFiles, setValue]);
+    // This syncs if the watched value changes and differs from local state
+    if (
+      multipleFilesValue &&
+      JSON.stringify(multipleFilesValue) !== JSON.stringify(uploadedFiles)
+    ) {
+      setUploadedFiles(multipleFilesValue);
+    }
+  }, [multipleFilesValue]);
 
   const handleMultipleFilesChange = (
     event: ChangeEvent<HTMLInputElement>
@@ -46,14 +76,16 @@ const ImagenesSection = () => {
 
       setUploadedFiles((prev) => {
         const updatedFiles = [...prev, ...filesArray];
-        setValue("multipleFiles", updatedFiles); // <-- Esto actualiza react-hook-form
+        setValue("multipleFiles", updatedFiles, { shouldValidate: true });
+        // setValue("multipleFiles", updatedFiles); // <-- Esto actualiza react-hook-form
         return updatedFiles;
       });
     }
   };
 
   const removeMainImage = (): void => {
-    setValue("mainImage", null);
+    setValue("mainImage", null, { shouldValidate: true });
+    // setValue("mainImage", null);
     setMainImagePreview(null);
   };
 
@@ -62,7 +94,8 @@ const ImagenesSection = () => {
       const updatedFiles = prevFiles.filter(
         (_, index) => index !== indexToRemove
       );
-      setValue("multipleFiles", updatedFiles); // <-- sincronizar con el form
+      // setValue("multipleFiles", updatedFiles); // <-- sincronizar con el form
+      setValue("multipleFiles", updatedFiles, { shouldValidate: true }); // Sync with RHF and validate
       return updatedFiles;
     });
   };
@@ -95,6 +128,7 @@ const ImagenesSection = () => {
     if (files.length > 0) {
       setUploadedFiles((prev) => {
         const newFiles = [...prev, ...files];
+        setValue("multipleFiles", newFiles, { shouldValidate: true });
         setValue("multipleFiles", newFiles); // <-- Esto actualiza react-hook-form
         return newFiles;
       });
@@ -110,10 +144,10 @@ const ImagenesSection = () => {
       {/* Imagen Principal */}
       <div className="col-span-full">
         <label
-          htmlFor="main-image"
+          htmlFor="main-image-input"
           className="block text-sm font-medium text-gray-900 dark:text-white"
         >
-          Imagen Principal
+          Imagen Principal* (requerida)
         </label>
 
         {mainImagePreview ? (
@@ -124,6 +158,7 @@ const ImagenesSection = () => {
               className="w-64 h-48 object-cover rounded-lg border"
             />
             <button
+              type="button" // Ensure it's not a submit button
               onClick={removeMainImage}
               className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
             >
@@ -145,21 +180,29 @@ const ImagenesSection = () => {
           <div
             onDrop={handleMainImageDrop}
             onDragOver={handleMainImageDragOver}
-            className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 dark:border-white px-6 py-10"
+            className={`mt-2 flex justify-center rounded-lg border border-dashed ${
+              errors.mainImage
+                ? "border-red-500"
+                : "border-gray-900/25 dark:border-white"
+            } px-6 py-10`}
           >
             <div className="text-center">
               <MdOutlineAddPhotoAlternate className="mx-auto size-12 text-gray-300" />
               <div className="mt-4 flex text-sm text-gray-600 dark:text-white">
                 <label
-                  htmlFor="main-image"
+                  htmlFor="main-image-input"
                   className="relative cursor-pointer px-2 rounded-md bg-white dark:bg-gray-800 font-semibold text-indigo-600 focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 focus-within:outline-hidden hover:text-indigo-500"
                 >
                   <span>Subir Imagen</span>
                   <input
-                    id="main-image"
+                    id="main-image-input"
                     type="file"
                     accept="image/*"
-                    {...register("mainImage")}
+                    {...register("mainImage", {
+                      validate: (value: FileList | null | undefined) =>
+                        (value && value.length > 0) ||
+                        "La imagen principal es obligatoria.",
+                    })}
                     className="sr-only"
                   />
                 </label>
@@ -176,10 +219,10 @@ const ImagenesSection = () => {
       {/* Múltiples Archivos */}
       <div className="col-span-full">
         <label
-          htmlFor="multiple-files"
+          htmlFor="multiple-files-input"
           className="block text-sm font-medium text-gray-900 dark:text-white"
         >
-          Subir múltiples archivos
+          Imágenes Adicionales* (mínimo 2)
         </label>
 
         <div
@@ -191,16 +234,15 @@ const ImagenesSection = () => {
             <MdOutlineAddPhotoAlternate className="mx-auto size-12 text-gray-300" />
             <div className="mt-4 flex text-sm text-gray-600 dark:text-white">
               <label
-                htmlFor="multiple-files"
+                htmlFor="multiple-files-input"
                 className="relative cursor-pointer px-2 rounded-md bg-white dark:bg-gray-800 font-semibold text-indigo-600 focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 focus-within:outline-hidden hover:text-indigo-500"
               >
                 <span>Subir archivos</span>
                 <input
-                  id="multiple-files"
+                  id="multiple-files-input"
                   type="file"
                   multiple
                   accept="image/*"
-                  // {...register("multipleFiles")}
                   onChange={handleMultipleFilesChange}
                   className="sr-only"
                 />
@@ -240,6 +282,11 @@ const ImagenesSection = () => {
           </div>
         )}
       </div>
+      {errors.multipleFiles && (
+        <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+          {errors.multipleFiles?.message as string}
+        </p>
+      )}
     </div>
   );
 };

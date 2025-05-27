@@ -41,17 +41,12 @@ export default function TituloSection({ onGenerateTitle }: Props) {
         <input
           type="text"
           {...register("titulo", {
-            required: true,
+            required: "El título es obligatorio",
             validate: noCodigoMalicioso,
           })}
           className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 dark:text-white dark:bg-gray-800 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
           placeholder="Ingrese el título"
         />
-        {errors.titulo && (
-          <p className="text-red-500 text-sm mt-1">
-            {errors.titulo.message as string}
-          </p>
-        )}
         <button
           type="button"
           onClick={handleGenerateTitle}
@@ -68,6 +63,11 @@ export default function TituloSection({ onGenerateTitle }: Props) {
           )}
         </button>
       </div>
+      {errors.titulo && (
+        <p className="text-red-500 text-sm mt-1">
+          {errors.titulo.message as string}
+        </p>
+      )}
     </section>
   );
 }
